@@ -7,6 +7,12 @@
   --bg: #ffffff;
   --bg-soft: #fbfbfb;
   --text: #0b0b0b;
+  --brand-primary-tint: rgba(87, 35, 179, 0.08);
+}
+
+/* Root baseline */
+html {
+  font-size: 100%;
 }
 
 * {
@@ -20,4 +26,68 @@ body {
   color: var(--text);
   font-family: var(--font-poppins), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   line-height: 1.6;
+}
+
+/* Typography baseline */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--text);
+  margin: 0 0 0.75rem;
+  line-height: 1.2;
+}
+
+h1 {
+  font-size: 2.25rem;
+  font-weight: 700;
+}
+
+h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+h3 {
+  font-size: 1.375rem;
+  font-weight: 600;
+}
+
+h4 {
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+h5 {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+h6 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+p {
+  margin: 0 0 1rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+strong {
+  color: var(--text);
+  font-weight: 700;
 }

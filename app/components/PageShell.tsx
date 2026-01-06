@@ -5,6 +5,6 @@ type PageProps = {
   children: ReactNode;
 };
 
-export default function Page({ children }: PageProps) {
+export default function PageShell({ children }: PageProps) {
   return <main className={styles.page}>{children}</main>;
 }

@@ -1,10 +1,5 @@
-import Page from "./components/Page";
+import { redirect } from "next/navigation";
 
 export default function Home() {
-  return (
-    <Page>
-      <h1>Dexter</h1>
-      <p>A simple Kanban learning app</p>
-    </Page>
-  );
+  redirect("/board");
 }
