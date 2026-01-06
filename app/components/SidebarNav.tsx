@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import styles from "../layout.module.css";
+import styles from "./SidebarNav.module.css";
 
 const links = [
   { href: "/board", label: "Board" },

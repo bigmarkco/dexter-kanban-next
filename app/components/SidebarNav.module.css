@@ -1,0 +1,30 @@
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.navLink {
+  display: flex;
+  align-items: center;
+  padding: 0.625rem 0.75rem;
+  color: var(--text);
+  text-decoration: none;
+  border-radius: 0.5rem;
+}
+
+.navLink:hover {
+  color: var(--brand-primary);
+  background: var(--brand-primary-tint);
+}
+
+.navLinkActive {
+  color: var(--brand-primary);
+  background: var(--brand-primary-tint);
+  box-shadow: inset 0.1875rem 0 0 var(--brand-primary);
+}
+
+.navLink:focus-visible {
+  outline: 0.125rem solid var(--brand-primary);
+  outline-offset: 0.125rem;
+}
