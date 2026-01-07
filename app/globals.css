@@ -28,6 +28,12 @@ body {
   line-height: 1.6;
 }
 
+button,
+input,
+textarea {
+  font: inherit;
+}
+
 /* Typography baseline */
 h1,
 h2,
@@ -87,7 +93,27 @@ a:hover {
   text-decoration: underline;
 }
 
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 0.125rem solid var(--brand-primary);
+  outline-offset: 0.15rem;
+}
+
 strong {
   color: var(--text);
   font-weight: 700;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }

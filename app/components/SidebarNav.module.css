@@ -27,4 +27,5 @@
 .navLink:focus-visible {
   outline: 0.125rem solid var(--brand-primary);
   outline-offset: 0.125rem;
+  background: var(--brand-primary-tint);
 }

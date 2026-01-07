@@ -29,6 +29,8 @@
 .moveGroup {
   display: flex;
   gap: 0.5rem;
+  align-items: center;
+  min-height: 2.25rem;
 }
 
 .metaActions {

@@ -1,0 +1,639 @@
+
+
+===== app/components/kanban/TaskCard.tsx =====
+
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import type { Task } from "./useTasks";
+import ui from "../ui/ui.module.css";
+import styles from "./TaskCard.module.css";
+
+type TaskCardProps = {
+  task: Task;
+  onMoveLeft: () => void;
+  onMoveRight: () => void;
+  onArchive: () => void;
+  onDelete: () => void;
+  onUpdate: (title: string, description?: string) => void;
+  disableMoveLeft?: boolean;
+  disableMoveRight?: boolean;
+};
+
+export default function TaskCard({
+  task,
+  onMoveLeft,
+  onMoveRight,
+  onArchive,
+  onDelete,
+  onUpdate,
+  disableMoveLeft,
+  disableMoveRight,
+}: TaskCardProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [title, setTitle] = useState(task.title);
+  const [description, setDescription] = useState(task.description || "");
+  const titleInputRef = useRef<HTMLInputElement | null>(null);
+  const editButtonRef = useRef<HTMLButtonElement | null>(null);
+  const wasEditing = useRef(false);
+  const titleId = `task-${task.id}-title`;
+  const editTitleId = `task-${task.id}-edit-title`;
+  const editDescId = `task-${task.id}-edit-desc`;
+
+  useEffect(() => {
+    if (isEditing) {
+      titleInputRef.current?.focus();
+    } else if (wasEditing.current) {
+      editButtonRef.current?.focus();
+    }
+    wasEditing.current = isEditing;
+  }, [isEditing]);
+
+  const handleSave = () => {
+    if (!title.trim()) return;
+    onUpdate(title, description);
+    setIsEditing(false);
+  };
+
+  return (
+    <article className={`${ui.card} ${styles.card}`} aria-labelledby={titleId}>
+      {isEditing ? (
+        <div className={styles.editFields}>
+          <h3 className="srOnly" id={titleId}>
+            {task.title}
+          </h3>
+          <label className="srOnly" htmlFor={editTitleId}>
+            Task title
+          </label>
+          <input
+            className={ui.field}
+            id={editTitleId}
+            ref={titleInputRef}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Title"
+            required
+          />
+          <label className="srOnly" htmlFor={editDescId}>
+            Task description
+          </label>
+          <textarea
+            className={`${ui.field} ${styles.textarea}`}
+            id={editDescId}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Description"
+            rows={3}
+          />
+        </div>
+      ) : (
+        <div className={styles.copy}>
+          <h3 className={styles.title} id={titleId}>
+            {task.title}
+          </h3>
+          {task.description ? <p className={styles.description}>{task.description}</p> : null}
+        </div>
+      )}
+
+      <div className={styles.actions}>
+        <div className={styles.moveGroup}>
+          {disableMoveLeft !== true ? (
+            <button className={`${ui.btn} ${ui.btnGhost}`} type="button" onClick={onMoveLeft} aria-label="Move left">
+              ?
+            </button>
+          ) : null}
+          {disableMoveRight !== true ? (
+            <button className={`${ui.btn} ${ui.btnGhost}`} type="button" onClick={onMoveRight} aria-label="Move right">
+              ?
+            </button>
+          ) : null}
+        </div>
+        <div className={styles.metaActions}>
+          {isEditing ? (
+            <>
+              <button className={`${ui.btn} ${ui.btnPrimary}`} type="button" onClick={handleSave}>
+                Save
+              </button>
+              <button className={`${ui.btn} ${ui.btnGhost}`} type="button" onClick={() => setIsEditing(false)}>
+                Cancel
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                className={`${ui.btn} ${ui.btnGhost}`}
+                type="button"
+                onClick={() => setIsEditing(true)}
+                ref={editButtonRef}
+              >
+                Edit
+              </button>
+              <button className={`${ui.btn} ${ui.btnGhost}`} type="button" onClick={onArchive}>
+                Archive
+              </button>
+            </>
+          )}
+          <button
+            className={`${ui.btn} ${ui.btnDanger}`}
+            type="button"
+            onClick={() => {
+              if (window.confirm(`Delete "${task.title}"?`)) onDelete();
+            }}
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+
+===== app/components/kanban/Column.tsx =====
+
+"use client";
+
+import TaskCard from "./TaskCard";
+import type { Task, TaskStatus } from "./useTasks";
+import styles from "./Column.module.css";
+
+type ColumnProps = {
+  title: string;
+  status: TaskStatus;
+  tasks: Task[];
+  onMove: (id: string, direction: "left" | "right") => void;
+  onArchive: (id: string) => void;
+  onDelete: (id: string) => void;
+  onUpdate: (id: string, title: string, description?: string) => void;
+};
+
+export default function Column({
+  title,
+  status,
+  tasks,
+  onMove,
+  onArchive,
+  onDelete,
+  onUpdate,
+}: ColumnProps) {
+  const headingId = `${status}-heading`;
+
+  return (
+    <section className={styles.column} data-status={status} aria-labelledby={headingId}>
+      <header className={styles.header}>
+        <h2 className={styles.title} id={headingId}>
+          {title}
+        </h2>
+        <span className={styles.count}>{tasks.length}</span>
+      </header>
+      {tasks.length === 0 ? (
+        <p className={styles.empty}>No tasks in {title} yet.</p>
+      ) : (
+        <ul className={styles.list}>
+          {tasks.map((task) => (
+            <li key={task.id} className={styles.listItem}>
+              <TaskCard
+                task={task}
+                onMoveLeft={() => onMove(task.id, "left")}
+                onMoveRight={() => onMove(task.id, "right")}
+                onArchive={() => onArchive(task.id)}
+                onDelete={() => onDelete(task.id)}
+                onUpdate={(nextTitle, nextDesc) => onUpdate(task.id, nextTitle, nextDesc)}
+                disableMoveLeft={status === "todo"}
+                disableMoveRight={status === "done"}
+              />
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+
+===== app/components/ui/ui.module.css =====
+
+/* Card base */
+.card {
+  background: var(--bg);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  box-shadow: 0 0.125rem 0.375rem rgba(0, 0, 0, 0.04);
+}
+
+/* Form fields */
+.field {
+  width: 100%;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 0.5rem;
+  padding: 0.75rem 0.875rem;
+  font-size: 1rem;
+  color: var(--text);
+  background: var(--bg-soft);
+}
+
+.field:focus-visible {
+  outline: 0.125rem solid var(--brand-primary);
+  outline-offset: 0.1rem;
+  background: var(--bg);
+}
+
+/* Buttons */
+.btn {
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  padding: 0.55rem 0.85rem;
+  background: var(--bg-soft);
+  color: var(--text);
+  cursor: pointer;
+  font-weight: 600;
+  line-height: 1.2;
+  min-height: 2.25rem;
+  transition: background 120ms ease, color 120ms ease, border-color 120ms ease, filter 120ms ease, box-shadow 120ms ease, transform 120ms ease;
+}
+
+.btn:focus-visible {
+  outline: 0.125rem solid var(--brand-primary);
+  outline-offset: 0.1rem;
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn:disabled:hover {
+  background: var(--bg-soft);
+  color: var(--text);
+  filter: none;
+  box-shadow: none;
+  transform: none;
+}
+
+.btnPrimary {
+  background: var(--brand-primary);
+  color: #ffffff;
+  border-color: transparent;
+}
+
+.btnPrimary:hover {
+  filter: brightness(1.05);
+}
+
+.btnPrimary:active {
+  transform: translateY(0.05rem);
+}
+
+.btnGhost {
+  /* base is handled by .btn; this exists so CSS Modules exports ui.btnGhost */
+}
+
+.btnGhost:hover {
+  background: var(--brand-primary-tint);
+  color: var(--brand-primary);
+}
+
+.btnDanger {
+  border-color: rgba(179, 35, 124, 0.25);
+  color: #b3237c;
+}
+
+.btnDanger:hover {
+  background: var(--brand-primary-tint);
+  color: #b3237c;
+}
+
+
+===== app/components/kanban/TaskForm.tsx =====
+
+"use client";
+
+import { useRef, useState } from "react";
+import ui from "../ui/ui.module.css";
+import styles from "./TaskForm.module.css";
+
+type TaskFormProps = {
+  onAdd: (title: string, description?: string) => void;
+};
+
+export default function TaskForm({ onAdd }: TaskFormProps) {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const titleInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!title.trim()) return;
+    onAdd(title, description);
+    setTitle("");
+    setDescription("");
+    titleInputRef.current?.focus();
+  };
+
+  return (
+    <form className={`${styles.form} ${ui.card}`} onSubmit={handleSubmit}>
+      <div className={styles.fields}>
+        <label className="srOnly" htmlFor="task-title">
+          Task title
+        </label>
+        <input
+          className={ui.field}
+          type="text"
+          id="task-title"
+          ref={titleInputRef}
+          placeholder="Task title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          required
+        />
+        <label className="srOnly" htmlFor="task-desc">
+          Task description (optional)
+        </label>
+        <textarea
+          className={`${ui.field} ${styles.textarea}`}
+          id="task-desc"
+          placeholder="Description (optional)"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          rows={3}
+        />
+      </div>
+      <div className={styles.actions}>
+        <button className={`${ui.btn} ${ui.btnPrimary}`} type="submit">
+          Add task
+        </button>
+      </div>
+    </form>
+  );
+}
+
+
+===== app/globals.css =====
+
+:root {
+  --brand-primary: #5723b3;
+  --brand-secondary: #3e5fa4;
+  --accent-1: #a0c4ff;
+  --accent-2: #b3237c;
+  --accent-3: #23a5b3;
+  --bg: #ffffff;
+  --bg-soft: #fbfbfb;
+  --text: #0b0b0b;
+  --brand-primary-tint: rgba(87, 35, 179, 0.08);
+}
+
+/* Root baseline */
+html {
+  font-size: 100%;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-poppins), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.6;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+/* Typography baseline */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--text);
+  margin: 0 0 0.75rem;
+  line-height: 1.2;
+}
+
+h1 {
+  font-size: 2.25rem;
+  font-weight: 700;
+}
+
+h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+h3 {
+  font-size: 1.375rem;
+  font-weight: 600;
+}
+
+h4 {
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+h5 {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+h6 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+p {
+  margin: 0 0 1rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 0.125rem solid var(--brand-primary);
+  outline-offset: 0.15rem;
+}
+
+strong {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+
+===== app/layout.tsx =====
+
+import type { Metadata } from "next";
+import type { ReactNode } from "react";
+import { Poppins } from "next/font/google";
+import "./globals.css";
+import styles from "./layout.module.css";
+import SidebarNav from "./components/SidebarNav";
+
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+  variable: "--font-poppins",
+});
+
+export const metadata: Metadata = {
+  title: "Dexter",
+  description: "A simple Kanban learning app",
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  return (
+    <html lang="en-NZ">
+      <body className={poppins.variable}>
+        <a className={styles.skipLink} href="#main-content">
+          Skip to content
+        </a>
+        <div className={styles.shell}>
+          <aside className={styles.sidebar}>
+            <div className={styles.brand}>Dexter</div>
+            <SidebarNav />
+          </aside>
+          <div className={styles.main} id="main-content">
+            {children}
+          </div>
+        </div>
+      </body>
+    </html>
+  );
+}
+
+
+===== app/board/page.tsx =====
+
+"use client";
+
+import PageShell from "../components/PageShell";
+import Column from "../components/kanban/Column";
+import TaskForm from "../components/kanban/TaskForm";
+import { useTasks } from "../components/kanban/useTasks";
+import styles from "./page.module.css";
+
+const COLUMNS = [
+  { status: "todo", title: "To do" },
+  { status: "doing", title: "Doing" },
+  { status: "done", title: "Done" },
+] as const;
+
+export default function BoardPage() {
+  const { tasks, addTask, moveTask, archiveTask, deleteTask, updateTask } = useTasks();
+  const activeTasks = tasks.filter((task) => !task.archived);
+
+  return (
+    <PageShell>
+      <h1 className="srOnly">Board</h1>
+      <div className={styles.board}>
+        <TaskForm onAdd={addTask} />
+        <div className={styles.columns}>
+          {COLUMNS.map((column) => (
+            <Column
+              key={column.status}
+              title={column.title}
+              status={column.status}
+              tasks={activeTasks.filter((task) => task.status === column.status)}
+              onMove={moveTask}
+              onArchive={archiveTask}
+              onDelete={deleteTask}
+              onUpdate={updateTask}
+            />
+          ))}
+        </div>
+      </div>
+    </PageShell>
+  );
+}
+
+
+===== app/archive/page.tsx =====
+
+"use client";
+
+import PageShell from "../components/PageShell";
+import { useTasks } from "../components/kanban/useTasks";
+import ui from "../components/ui/ui.module.css";
+import styles from "./page.module.css";
+
+export default function ArchivePage() {
+  const { tasks, restoreTask, deleteTask } = useTasks();
+  const archived = tasks.filter((task) => task.archived);
+
+  return (
+    <PageShell>
+      <div className={styles.archive}>
+        <h1>Archive</h1>
+        {archived.length === 0 ? (
+          <p className={styles.empty}>No archived tasks yet. Archived tasks will show up here.</p>
+        ) : (
+          <ul className={styles.list}>
+            {archived.map((task) => (
+              <li key={task.id} className={styles.item}>
+                <div className={styles.copy}>
+                  <h2>{task.title}</h2>
+                  {task.description ? <p>{task.description}</p> : null}
+                </div>
+                <div className={styles.actions}>
+                  <button
+                    className={`${ui.btn} ${ui.btnPrimary}`}
+                    type="button"
+                    onClick={() => restoreTask(task.id)}
+                    aria-label={`Restore "${task.title}"`}
+                  >
+                    Restore
+                  </button>
+                  <button
+                    className={`${ui.btn} ${ui.btnDanger}`}
+                    type="button"
+                    onClick={() => {
+                      if (window.confirm(`Delete "${task.title}"?`)) deleteTask(task.id);
+                    }}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </PageShell>
+  );
+}

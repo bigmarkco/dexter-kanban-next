@@ -14,7 +14,7 @@ export default function ArchivePage() {
       <div className={styles.archive}>
         <h1>Archive</h1>
         {archived.length === 0 ? (
-          <p className={styles.empty}>No archived tasks yet.</p>
+          <p className={styles.empty}>No archived tasks yet. Archived tasks will show up here.</p>
         ) : (
           <ul className={styles.list}>
             {archived.map((task) => (
@@ -24,14 +24,19 @@ export default function ArchivePage() {
                   {task.description ? <p>{task.description}</p> : null}
                 </div>
                 <div className={styles.actions}>
-                  <button className={`${ui.btn} ${ui.btnPrimary}`} type="button" onClick={() => restoreTask(task.id)}>
+                  <button
+                    className={`${ui.btn} ${ui.btnPrimary}`}
+                    type="button"
+                    onClick={() => restoreTask(task.id)}
+                    aria-label={`Restore "${task.title}"`}
+                  >
                     Restore
                   </button>
                   <button
                     className={`${ui.btn} ${ui.btnDanger}`}
                     type="button"
                     onClick={() => {
-                      if (window.confirm("Delete this task?")) deleteTask(task.id);
+                      if (window.confirm(`Delete "${task.title}"?`)) deleteTask(task.id);
                     }}
                   >
                     Delete

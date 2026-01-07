@@ -23,28 +23,36 @@ export default function Column({
   onDelete,
   onUpdate,
 }: ColumnProps) {
+  const headingId = `${status}-heading`;
+
   return (
-    <section className={styles.column} data-status={status}>
+    <section className={styles.column} data-status={status} aria-labelledby={headingId}>
       <header className={styles.header}>
-        <h2 className={styles.title}>{title}</h2>
+        <h2 className={styles.title} id={headingId}>
+          {title}
+        </h2>
         <span className={styles.count}>{tasks.length}</span>
       </header>
-      <div className={styles.list}>
-        {tasks.map((task) => (
-          <TaskCard
-            key={task.id}
-            task={task}
-            onMoveLeft={() => onMove(task.id, "left")}
-            onMoveRight={() => onMove(task.id, "right")}
-            onArchive={() => onArchive(task.id)}
-            onDelete={() => onDelete(task.id)}
-            onUpdate={(nextTitle, nextDesc) => onUpdate(task.id, nextTitle, nextDesc)}
-            disableMoveLeft={status === "todo"}
-            disableMoveRight={status === "done"}
-          />
-        ))}
-        {tasks.length === 0 ? <p className={styles.empty}>No tasks yet</p> : null}
-      </div>
+      {tasks.length === 0 ? (
+        <p className={styles.empty}>No tasks in {title} yet.</p>
+      ) : (
+        <ul className={styles.list}>
+          {tasks.map((task) => (
+            <li key={task.id} className={styles.listItem}>
+              <TaskCard
+                task={task}
+                onMoveLeft={() => onMove(task.id, "left")}
+                onMoveRight={() => onMove(task.id, "right")}
+                onArchive={() => onArchive(task.id)}
+                onDelete={() => onDelete(task.id)}
+                onUpdate={(nextTitle, nextDesc) => onUpdate(task.id, nextTitle, nextDesc)}
+                disableMoveLeft={status === "todo"}
+                disableMoveRight={status === "done"}
+              />
+            </li>
+          ))}
+        </ul>
+      )}
     </section>
   );
 }

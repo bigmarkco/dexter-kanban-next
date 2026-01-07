@@ -13,7 +13,7 @@ export default function SidebarNav() {
   const pathname = usePathname();
 
   return (
-    <nav className={styles.nav}>
+    <nav className={styles.nav} aria-label="Primary">
       {links.map((link) => {
         const isActive = pathname === link.href;
         const className = `${styles.navLink} ${isActive ? styles.navLinkActive : ""}`;

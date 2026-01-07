@@ -18,6 +18,7 @@ export default function BoardPage() {
 
   return (
     <PageShell>
+      <h1 className="srOnly">Board</h1>
       <div className={styles.board}>
         <TaskForm onAdd={addTask} />
         <div className={styles.columns}>
