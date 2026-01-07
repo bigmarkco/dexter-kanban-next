@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import TaskCard from "./TaskCard";
 import type { Task, TaskStatus } from "./useTasks";
@@ -39,6 +39,8 @@ export default function Column({
             onArchive={() => onArchive(task.id)}
             onDelete={() => onDelete(task.id)}
             onUpdate={(nextTitle, nextDesc) => onUpdate(task.id, nextTitle, nextDesc)}
+            disableMoveLeft={status === "todo"}
+            disableMoveRight={status === "done"}
           />
         ))}
         {tasks.length === 0 ? <p className={styles.empty}>No tasks yet</p> : null}

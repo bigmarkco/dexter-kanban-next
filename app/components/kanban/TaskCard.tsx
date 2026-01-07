@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import type { Task } from "./useTasks";
@@ -12,6 +12,8 @@ type TaskCardProps = {
   onArchive: () => void;
   onDelete: () => void;
   onUpdate: (title: string, description?: string) => void;
+  disableMoveLeft?: boolean;
+  disableMoveRight?: boolean;
 };
 
 export default function TaskCard({
@@ -21,6 +23,8 @@ export default function TaskCard({
   onArchive,
   onDelete,
   onUpdate,
+  disableMoveLeft,
+  disableMoveRight,
 }: TaskCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(task.title);
@@ -59,12 +63,26 @@ export default function TaskCard({
 
       <div className={styles.actions}>
         <div className={styles.moveGroup}>
-          <button className={`${ui.btn} ${ui.btnGhost}`} type="button" onClick={onMoveLeft}>
-            ←
-          </button>
-          <button className={`${ui.btn} ${ui.btnGhost}`} type="button" onClick={onMoveRight}>
-            →
-          </button>
+          {disableMoveLeft !== true ? (
+            <button
+              className={`${ui.btn} ${ui.btnGhost}`}
+              type="button"
+              onClick={onMoveLeft}
+              aria-label={`Move task "${task.title}" left`}
+            >
+              ←
+            </button>
+          ) : null}
+          {disableMoveRight !== true ? (
+            <button
+              className={`${ui.btn} ${ui.btnGhost}`}
+              type="button"
+              onClick={onMoveRight}
+              aria-label={`Move task "${task.title}" right`}
+            >
+              →
+            </button>
+          ) : null}
         </div>
         <div className={styles.metaActions}>
           {isEditing ? (

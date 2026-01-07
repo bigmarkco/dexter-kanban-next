@@ -1,4 +1,4 @@
-/* Card base */
+﻿/* Card base */
 .card {
   background: var(--bg);
   border: 1px solid rgba(0, 0, 0, 0.06);
@@ -39,6 +39,19 @@
 .btn:focus-visible {
   outline: 0.125rem solid var(--brand-primary);
   outline-offset: 0.1rem;
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn:disabled:hover {
+  background: var(--bg-soft);
+  color: var(--text);
+  filter: none;
+  box-shadow: none;
+  transform: none;
 }
 
 .btnPrimary {
