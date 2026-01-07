@@ -1,0 +1,419 @@
+
+
+===== app/components/ui/ui.module.css =====
+
+/* Card base */
+.card {
+  background: var(--bg);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  box-shadow: 0 0.125rem 0.375rem rgba(0, 0, 0, 0.04);
+}
+
+/* Form fields */
+.field {
+  width: 100%;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 0.5rem;
+  padding: 0.75rem 0.875rem;
+  font-size: 1rem;
+  color: var(--text);
+  background: var(--bg-soft);
+}
+
+.field:focus-visible {
+  outline: 0.125rem solid var(--brand-primary);
+  outline-offset: 0.1rem;
+  background: var(--bg);
+}
+
+/* Buttons */
+.btn {
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  padding: 0.55rem 0.85rem;
+  background: var(--bg-soft);
+  color: var(--text);
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 120ms ease, color 120ms ease, border-color 120ms ease, filter 120ms ease, box-shadow 120ms ease, transform 120ms ease;
+}
+
+.btn:focus-visible {
+  outline: 0.125rem solid var(--brand-primary);
+  outline-offset: 0.1rem;
+}
+
+.btnPrimary {
+  background: var(--brand-primary);
+  color: #ffffff;
+  border-color: transparent;
+}
+
+.btnPrimary:hover {
+  filter: brightness(1.05);
+}
+
+.btnPrimary:active {
+  transform: translateY(0.05rem);
+}
+
+.btnGhost:hover {
+  background: var(--brand-primary-tint);
+  color: var(--brand-primary);
+}
+
+.btnDanger {
+  border-color: rgba(179, 35, 124, 0.25);
+  color: #b3237c;
+}
+
+.btnDanger:hover {
+  background: var(--brand-primary-tint);
+  color: #b3237c;
+}
+
+
+===== app/components/kanban/TaskForm.tsx =====
+
+"use client";
+
+import { useState } from "react";
+import ui from "../ui/ui.module.css";
+import styles from "./TaskForm.module.css";
+
+type TaskFormProps = {
+  onAdd: (title: string, description?: string) => void;
+};
+
+export default function TaskForm({ onAdd }: TaskFormProps) {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!title.trim()) return;
+    onAdd(title, description);
+    setTitle("");
+    setDescription("");
+  };
+
+  return (
+    <form className={`${styles.form} ${ui.card}`} onSubmit={handleSubmit}>
+      <div className={styles.fields}>
+        <input
+          className={ui.field}
+          type="text"
+          placeholder="Task title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          required
+        />
+        <textarea
+          className={`${ui.field} ${styles.textarea}`}
+          placeholder="Description (optional)"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          rows={3}
+        />
+      </div>
+      <div className={styles.actions}>
+        <button className={`${ui.btn} ${ui.btnPrimary}`} type="submit">
+          Add task
+        </button>
+      </div>
+    </form>
+  );
+}
+
+
+===== app/components/kanban/TaskForm.module.css =====
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.textarea {
+  resize: vertical;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+
+===== app/components/kanban/TaskCard.tsx =====
+
+"use client";
+
+import { useState } from "react";
+import type { Task } from "./useTasks";
+import ui from "../ui/ui.module.css";
+import styles from "./TaskCard.module.css";
+
+type TaskCardProps = {
+  task: Task;
+  onMoveLeft: () => void;
+  onMoveRight: () => void;
+  onArchive: () => void;
+  onDelete: () => void;
+  onUpdate: (title: string, description?: string) => void;
+};
+
+export default function TaskCard({
+  task,
+  onMoveLeft,
+  onMoveRight,
+  onArchive,
+  onDelete,
+  onUpdate,
+}: TaskCardProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [title, setTitle] = useState(task.title);
+  const [description, setDescription] = useState(task.description || "");
+
+  const handleSave = () => {
+    if (!title.trim()) return;
+    onUpdate(title, description);
+    setIsEditing(false);
+  };
+
+  return (
+    <article className={`${ui.card} ${styles.card}`}>
+      {isEditing ? (
+        <div className={styles.editFields}>
+          <input
+            className={ui.field}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Title"
+          />
+          <textarea
+            className={`${ui.field} ${styles.textarea}`}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Description"
+            rows={3}
+          />
+        </div>
+      ) : (
+        <div className={styles.copy}>
+          <h3 className={styles.title}>{task.title}</h3>
+          {task.description ? <p className={styles.description}>{task.description}</p> : null}
+        </div>
+      )}
+
+      <div className={styles.actions}>
+        <div className={styles.moveGroup}>
+          <button className={`${ui.btn} ${ui.btnGhost}`} type="button" onClick={onMoveLeft}>
+            ƒ+?
+          </button>
+          <button className={`${ui.btn} ${ui.btnGhost}`} type="button" onClick={onMoveRight}>
+            ƒ+'
+          </button>
+        </div>
+        <div className={styles.metaActions}>
+          {isEditing ? (
+            <>
+              <button className={`${ui.btn} ${ui.btnPrimary}`} type="button" onClick={handleSave}>
+                Save
+              </button>
+              <button className={`${ui.btn} ${ui.btnGhost}`} type="button" onClick={() => setIsEditing(false)}>
+                Cancel
+              </button>
+            </>
+          ) : (
+            <>
+              <button className={`${ui.btn} ${ui.btnGhost}`} type="button" onClick={() => setIsEditing(true)}>
+                Edit
+              </button>
+              <button className={`${ui.btn} ${ui.btnGhost}`} type="button" onClick={onArchive}>
+                Archive
+              </button>
+            </>
+          )}
+          <button
+            className={`${ui.btn} ${ui.btnDanger}`}
+            type="button"
+            onClick={() => {
+              if (window.confirm("Delete this task?")) onDelete();
+            }}
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+
+===== app/components/kanban/TaskCard.module.css =====
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.description {
+  margin: 0;
+  color: rgba(11, 11, 11, 0.8);
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.moveGroup {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.metaActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.editFields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.textarea {
+  resize: vertical;
+}
+
+
+===== app/archive/page.tsx =====
+
+"use client";
+
+import PageShell from "../components/PageShell";
+import { useTasks } from "../components/kanban/useTasks";
+import ui from "../components/ui/ui.module.css";
+import styles from "./page.module.css";
+
+export default function ArchivePage() {
+  const { tasks, restoreTask, deleteTask } = useTasks();
+  const archived = tasks.filter((task) => task.archived);
+
+  return (
+    <PageShell>
+      <div className={styles.archive}>
+        <h1>Archive</h1>
+        {archived.length === 0 ? (
+          <p className={styles.empty}>No archived tasks yet.</p>
+        ) : (
+          <ul className={styles.list}>
+            {archived.map((task) => (
+              <li key={task.id} className={styles.item}>
+                <div className={styles.copy}>
+                  <h2>{task.title}</h2>
+                  {task.description ? <p>{task.description}</p> : null}
+                </div>
+                <div className={styles.actions}>
+                  <button className={`${ui.btn} ${ui.btnPrimary}`} type="button" onClick={() => restoreTask(task.id)}>
+                    Restore
+                  </button>
+                  <button
+                    className={`${ui.btn} ${ui.btnDanger}`}
+                    type="button"
+                    onClick={() => {
+                      if (window.confirm("Delete this task?")) deleteTask(task.id);
+                    }}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </PageShell>
+  );
+}
+
+
+===== app/archive/page.module.css =====
+
+.archive {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.item {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  background: var(--bg);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 0.75rem;
+  padding: 1rem;
+}
+
+.copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.empty {
+  margin: 0;
+  color: rgba(11, 11, 11, 0.6);
+}
+
+@media (max-width: 37.5rem) {
+  .item {
+    flex-direction: column;
+  }
+
+  .actions {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+}

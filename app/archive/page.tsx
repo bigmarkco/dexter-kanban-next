@@ -2,6 +2,7 @@
 
 import PageShell from "../components/PageShell";
 import { useTasks } from "../components/kanban/useTasks";
+import ui from "../components/ui/ui.module.css";
 import styles from "./page.module.css";
 
 export default function ArchivePage() {
@@ -23,11 +24,11 @@ export default function ArchivePage() {
                   {task.description ? <p>{task.description}</p> : null}
                 </div>
                 <div className={styles.actions}>
-                  <button className={styles.primaryButton} type="button" onClick={() => restoreTask(task.id)}>
+                  <button className={`${ui.btn} ${ui.btnPrimary}`} type="button" onClick={() => restoreTask(task.id)}>
                     Restore
                   </button>
                   <button
-                    className={styles.dangerButton}
+                    className={`${ui.btn} ${ui.btnDanger}`}
                     type="button"
                     onClick={() => {
                       if (window.confirm("Delete this task?")) deleteTask(task.id);

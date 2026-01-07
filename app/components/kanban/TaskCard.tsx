@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { Task } from "./useTasks";
+import ui from "../ui/ui.module.css";
 import styles from "./TaskCard.module.css";
 
 type TaskCardProps = {
@@ -32,17 +33,17 @@ export default function TaskCard({
   };
 
   return (
-    <article className={styles.card}>
+    <article className={`${ui.card} ${styles.card}`}>
       {isEditing ? (
         <div className={styles.editFields}>
           <input
-            className={styles.input}
+            className={ui.field}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Title"
           />
           <textarea
-            className={styles.textarea}
+            className={`${ui.field} ${styles.textarea}`}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Description"
@@ -58,35 +59,35 @@ export default function TaskCard({
 
       <div className={styles.actions}>
         <div className={styles.moveGroup}>
-          <button className={styles.ghostButton} type="button" onClick={onMoveLeft}>
+          <button className={`${ui.btn} ${ui.btnGhost}`} type="button" onClick={onMoveLeft}>
             ←
           </button>
-          <button className={styles.ghostButton} type="button" onClick={onMoveRight}>
+          <button className={`${ui.btn} ${ui.btnGhost}`} type="button" onClick={onMoveRight}>
             →
           </button>
         </div>
         <div className={styles.metaActions}>
           {isEditing ? (
             <>
-              <button className={styles.primaryButton} type="button" onClick={handleSave}>
+              <button className={`${ui.btn} ${ui.btnPrimary}`} type="button" onClick={handleSave}>
                 Save
               </button>
-              <button className={styles.ghostButton} type="button" onClick={() => setIsEditing(false)}>
+              <button className={`${ui.btn} ${ui.btnGhost}`} type="button" onClick={() => setIsEditing(false)}>
                 Cancel
               </button>
             </>
           ) : (
             <>
-              <button className={styles.ghostButton} type="button" onClick={() => setIsEditing(true)}>
+              <button className={`${ui.btn} ${ui.btnGhost}`} type="button" onClick={() => setIsEditing(true)}>
                 Edit
               </button>
-              <button className={styles.ghostButton} type="button" onClick={onArchive}>
+              <button className={`${ui.btn} ${ui.btnGhost}`} type="button" onClick={onArchive}>
                 Archive
               </button>
             </>
           )}
           <button
-            className={styles.dangerButton}
+            className={`${ui.btn} ${ui.btnDanger}`}
             type="button"
             onClick={() => {
               if (window.confirm("Delete this task?")) onDelete();
